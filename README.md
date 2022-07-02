@@ -69,7 +69,7 @@ covariate = pd.read_csv('train_cov.csv')
 output_dir = "PATH_OUTPUT_DIR"
 npattern = 3
 final_saving_epoch = 42000
-	max_epoch = 43000
+max_epoch = 43000
 
 ## two important hyperparamters
 lam = 0.2
