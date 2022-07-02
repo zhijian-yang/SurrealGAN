@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="SurrealGAN",
-    version="0.0.1",
+    version="0.0.5",
     author="zhijian.yang",
     author_email="zhijianyang@outlook.com",
     description="A python implementation of Surreal-GAN for semisupervised representation learning",
@@ -19,12 +19,13 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ),
     install_requires=[         
-        'numpy'
-        'tqdm'
-        'torch'
-        'scikit-learn==0.24.2'
-        'scipy'
-        'pandas'
+        'numpy>=1.22.3',
+        'tqdm>=4.50.2',
+        'torch>=1.10.2',
+        'scikit-learn>=0.24.2',
+        'scipy>=1.8.0',
+        'pandas>=1.4.2',
+        'lifelines>=0.26.3'
     ]
 )
 
