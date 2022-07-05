@@ -5,13 +5,13 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="SurrealGAN",
-    version="0.0.5",
+    version="0.0.2",
     author="zhijian.yang",
     author_email="zhijianyang@outlook.com",
     description="A python implementation of Surreal-GAN for semisupervised representation learning",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/nyuyzj/Surreal-GAN",
+    url="https://github.com/zhijian-yang/SurrealGAN",
     packages=setuptools.find_packages(),
     classifiers=(
         "Programming Language :: Python :: 3",

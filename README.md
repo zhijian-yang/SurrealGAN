@@ -80,7 +80,7 @@ There are some hyper parameters need to be set by the user:
 
 ***batch\_size***: Size of the batch for each training epoch. (Default to be 100) It is **necessary** to be reset to 1/8 - 1/10 of the PT sample size.
 
-***mu***: coefficient controlling the relative importance of cluster\_loss in training objective function. (Default to be 0.2) It is **necessary** to try different ***mu*** values between 0.05 and 0.6 and use results which give the highest **pattern c-index** as returned in the output file.
+***lam***: coefficient controlling the relative importance of cluster\_loss in training objective function. (Default to be 0.2) It is **necessary** to try different ***lam*** values between 0.05 and 0.6 and use results which give the highest **pattern c-index** as returned in the output file.
 
 ***gamma***: coefficient controlling the relative importance of change\_loss in training objective function. (Default to be 6). The default value is robust to different cases, but users can try smaller or larger values if results with ***gamma=6*** gives low **pattern c-index** as returned in the output file.
 
