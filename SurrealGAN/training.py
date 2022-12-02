@@ -25,7 +25,7 @@ class Surreal_GAN_train():
     
     def __init__(self, npattern, final_saving_epoch, max_epoch, recons_loss_threshold, mono_loss_threshold, \
         lam=0.2, zeta=80, kappa=80, gamma=6, mu=500, eta=6, batchsize=25, lipschitz_k = 0.5, \
-        beta1 = 0.5, lr = 0.0002, max_gnorm = 100, eval_freq = 25, save_epoch_freq = 5, print_freq = 1000):
+        beta1 = 0.5, lr = 0.0002, max_gnorm = 100, eval_freq = 25, save_epoch_freq = 5, print_freq = 1000, saving_freq = 1000):
         self.opt=dotdict({})
         self.opt.npattern = npattern
         self.opt.final_saving_epoch = final_saving_epoch
@@ -46,6 +46,7 @@ class Surreal_GAN_train():
         self.opt.save_epoch_freq = save_epoch_freq
         self.opt.print_freq = print_freq
         self.opt.eval_freq = eval_freq
+        self.opt.saving_freq = saving_freq
 
     def print_log(self, result_f, message):
         result_f.write(message+"\n")
@@ -85,10 +86,10 @@ class Surreal_GAN_train():
         criterion_loss_list = [[0 for _ in range(2)] for _ in range(3)]                    ##### number of consecutive epochs with aq and cluster_loss < threshold
         predicted_label_past = np.zeros(self.opt.n_val_data)
 
-        if self.opt.final_saving_epoch%5000 == 0:
-            save_epoch = [i * 5000 for i in range(2,self.opt.final_saving_epoch//5000+1)]
+        if self.opt.final_saving_epoch%self.opt.saving_freq == 0:
+            save_epoch = [i * self.opt.saving_freq for i in range(2,self.opt.final_saving_epoch//self.opt.saving_freq+1)]
         else:
-            save_epoch = [i * 5000 for i in range(2,self.opt.final_saving_epoch//5000+1)]+[self.opt.final_saving_epoch]
+            save_epoch = [i * self.opt.saving_freq for i in range(2,self.opt.final_saving_epoch//self.opt.saving_freq+1)]+[self.opt.final_saving_epoch]
         save_epoch_index = 0 
         save_dir = os.path.join(save_dir,'repetition'+str(random_seed))
         if not os.path.exists(save_dir):

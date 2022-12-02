@@ -71,7 +71,7 @@ def apply_saved_model(model_dir, data, covariate=None):
 	model.predict_rindices(validation_data)
 	return model.predict_rindices(validation_data)
 
-def representation_result(model_dirs, npattern, data, final_saving_epoch, covariate=None):
+def representation_result(model_dirs, npattern, data, final_saving_epoch, saving_freq, covariate=None):
 	"""
 	Function used for derive representation results from several saved models
 	Args:
@@ -89,10 +89,10 @@ def representation_result(model_dirs, npattern, data, final_saving_epoch, covari
 	best_pattern_diff_agr_index = []
 	best_epoch = 0
 
-	if final_saving_epoch % 5000 == 0:
-		save_epoch = [i * 5000 for i in range(2,final_saving_epoch//5000+1)]
+	if final_saving_epoch % saving_freq == 0:
+		save_epoch = [i * saving_freq for i in range(2,final_saving_epoch//saving_freq+1)]
 	else:
-		save_epoch = [i * 5000 for i in range(2,final_saving_epoch//5000+1)]+[final_saving_epoch]
+		save_epoch = [i * saving_freq for i in range(2,final_saving_epoch//saving_freq+1)]+[final_saving_epoch]
 	if len(model_dirs) > 9:
 		for epoch in save_epoch:
 			all_prediction_rindices = []
@@ -111,11 +111,11 @@ def representation_result(model_dirs, npattern, data, final_saving_epoch, covari
 	
 	else:
 		raise Exception("At least 10 trained models are required (repetition number need to be at least 5)")
-	max_index = best_pattern_agr_index.index(max(best_pattern_agr_index))
-	return np.array(best_iteration_prediction_rindices[max_index]), max(best_pattern_agr_index), max(best_pattern_diff_agr_index), best_pattern_agr_index, best_pattern_diff_agr_index, best_model_dir
+	max_index = best_pattern_diff_agr_index.index(max(best_pattern_diff_agr_index))
+	return np.array(best_iteration_prediction_rindices[max_index]), best_pattern_agr_index[max_index], best_pattern_diff_agr_index[max_index], best_pattern_agr_index, best_pattern_diff_agr_index, best_model_dir
 
 
-def repetitive_representation_learning(data, npattern, repetition, fraction, final_saving_epoch, max_epoch, output_dir, mono_loss_threshold=0.006,\
+def repetitive_representation_learning(data, npattern, repetition, fraction, final_saving_epoch, max_epoch, output_dir, mono_loss_threshold=0.006, saving_freq = 1000,\
 		recons_loss_threshold=0.003, covariate=None, lam=0.2, zeta=80, kappa=80, gamma=6, mu=500, eta=6, batchsize=100, lipschitz_k = 0.5, verbose = False, \
 		beta1 = 0.5, lr = 0.0008, max_gnorm = 100, eval_freq = 50, save_epoch_freq = 5, start_repetition = 0, stop_repetition = None):
 	"""
@@ -164,7 +164,7 @@ def repetitive_representation_learning(data, npattern, repetition, fraction, fin
 
 	Surreal_GAN_model = Surreal_GAN_train(npattern, final_saving_epoch, max_epoch, recons_loss_threshold, mono_loss_threshold, \
 		lam=lam, zeta=zeta, kappa=kappa, gamma=gamma, mu=mu, eta=eta, batchsize=batchsize, \
-		lipschitz_k = lipschitz_k, beta1 = beta1, lr = lr, max_gnorm = max_gnorm, eval_freq = eval_freq, save_epoch_freq = save_epoch_freq)
+		lipschitz_k = lipschitz_k, beta1 = beta1, lr = lr, max_gnorm = max_gnorm, eval_freq = eval_freq, save_epoch_freq = save_epoch_freq, saving_freq = saving_freq)
 
 	if stop_repetition == None:
 		stop_repetition = repetition
@@ -177,7 +177,7 @@ def repetitive_representation_learning(data, npattern, repetition, fraction, fin
 
 	saved_models = [os.path.join(os.path.join(output_dir,'repetition'+str(i)))  for i in range(repetition)]
 	
-	r_indices, selected_model_pattern_agr_index, selected_model_pattern_diff_agr_index, pattern_agr_cindex, pattern_diff_agr_cindex, selected_model_dir = representation_result(saved_models, npattern, data, final_saving_epoch, covariate = covariate)
+	r_indices, selected_model_pattern_agr_index, selected_model_pattern_diff_agr_index, pattern_agr_cindex, pattern_diff_agr_cindex, selected_model_dir = representation_result(saved_models, npattern, data, final_saving_epoch, saving_freq, covariate = covariate)
 	
 	pt_data = data.loc[data['diagnosis'] == 1][['participant_id','diagnosis']]
 
@@ -187,6 +187,8 @@ def repetitive_representation_learning(data, npattern, repetition, fraction, fin
 	pt_data["path to selected model"] = [selected_model_dir]+['' for _ in range(r_indices.shape[0]-1)]
 	pt_data["selected model pattern-agr-index"] = ["%.3f" %(selected_model_pattern_agr_index)]+['' for _ in range(r_indices.shape[0]-1)]
 	pt_data["pattern-agr-index" ] = ["%.3f +- %.3f" %(np.mean(pattern_agr_cindex), np.std(pattern_agr_cindex))]+['' for _ in range(r_indices.shape[0]-1)]
+	pt_data["selected model pattern-diff-agr-index"] = ["%.3f" %(selected_model_pattern_diff_agr_index)]+['' for _ in range(r_indices.shape[0]-1)]
+	pt_data["pattern-diff-agr-index" ] = ["%.3f +- %.3f" %(np.mean(pattern_diff_agr_cindex), np.std(pattern_diff_agr_cindex))]+['' for _ in range(r_indices.shape[0]-1)]
 	
 	pt_data.to_csv(os.path.join(output_dir,'representation_result.csv'), index = False)
 	print('****** Surreal-GAN Representation Learning finished ******')

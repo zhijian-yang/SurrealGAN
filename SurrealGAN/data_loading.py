@@ -19,8 +19,6 @@ class PTIterator(object):
         self.num_samples = self.data.shape[0]
         self.batch_size = batch_size
         self.n_batches = int(self.num_samples / self.batch_size)
-        if self.num_samples % self.batch_size != 0:
-            self.n_batches += 1
         self.reset()
 
     def __iter__(self):
@@ -54,8 +52,6 @@ class CNIterator(object):
         self.num_samples = self.data.shape[0]
         self.batch_size = batch_size
         self.n_batches = int(self.num_samples / self.batch_size)
-        if self.num_samples % self.batch_size != 0:
-            self.n_batches += 1
         self.reset()
 
     def __iter__(self):
