@@ -63,7 +63,7 @@ def apply_saved_model(model_dir, data, covariate=None):
 
 	"""
 	data = data[data['diagnosis']==1]
-	if covariate != None:
+	if covariate is not None:
 		covariate = covariate[covariate['diagnosis']==1]
 	model = SurrealGAN()
 	model.load(model_dir)
