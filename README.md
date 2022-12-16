@@ -97,7 +97,7 @@ repetitive_representation_learning(train_data, npattern, repetition_number, data
 
 **repetitive\_representation\_learning** is the **main** function for representation learning via Surreal-GAN. It performs the representation learning process repetitively with a pre-defined number of repetitions. Each repetition will save models in a subfolder called "repetition_i", in which the model will be saved every ***saving\_freq*** epochs before the final\_saving\_epoch while saving criteria are satisfied. The function will automatically choose the optimal saving epochs via **pattern-agr-index** and **pattern-diff-agr-index** (explained below) among results. 
 
-After determining the optimal saving epoch, the repetition which has the highest agreements (measured by **pattern-diff-agr-index**) with all other repetitions will be used to derive the final R-indices. Given the randomness in training procedure, it is necessary to run **at least 10 repetitions** to derive a reliable and reproducible result. 
+After determining the optimal saving epoch, the repetition which has the highest agreements (measured by the sum of **pattern-agr-index** and **pattern-diff-agr-index**) with all other repetitions will be used to derive the final R-indices. Given the randomness in training procedure, it is necessary to run **at least 10 repetitions** to derive a reliable and reproducible result. 
 
 Since the repetition training process may take a long training time on a normal desktop computer, the function enables early stop and later resumption. Users can set ***stop\_repetition*** to be an early stopping point and ***start\_repetition*** to be the starting repetition index. This will also enable the user to run several repetitions in parallel.
 
