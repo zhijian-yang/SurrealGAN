@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="SurrealGAN",
-    version="0.0.5",
+    version="0.0.6",
     author="zhijian.yang",
     author_email="zhijianyang@outlook.com",
     description="A python implementation of Surreal-GAN for semisupervised representation learning",

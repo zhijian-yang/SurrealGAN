@@ -107,11 +107,12 @@ def representation_result(model_dirs, npattern, data, final_saving_epoch, saving
 				best_pattern_agr_index = pattern_agr_index
 				best_pattern_diff_agr_index = pattern_diff_agr_index
 				best_iteration_prediction_rindices = all_prediction_rindices
-				best_model_dir = os.path.join(model_dirs[pattern_agr_index.index(max(pattern_agr_index))], str(epoch)+'_epoch_model')
+				best_mean_indices = [a + b for a, b in zip(best_pattern_agr_index, best_pattern_diff_agr_index)]
+				max_index = best_mean_indices.index(max(best_mean_indices))
+				best_model_dir = os.path.join(model_dirs[max_index], str(epoch)+'_epoch_model')
 	
 	else:
-		raise Exception("At least 10 trained models are required (repetition number need to be at least 5)")
-	max_index = best_pattern_diff_agr_index.index(max(best_pattern_diff_agr_index))
+		raise Exception("At least 10 trained models are required (repetition number need to be at least 10)")
 	return np.array(best_iteration_prediction_rindices[max_index]), best_pattern_agr_index[max_index], best_pattern_diff_agr_index[max_index], best_pattern_agr_index, best_pattern_diff_agr_index, best_model_dir
 
 
