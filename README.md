@@ -84,7 +84,7 @@ There are some hyper parameters need to be set by the user:
 
 ***gamma***: coefficient controlling the relative importance of change\_loss in training objective function. (Default to be 6). It is **necessary** to try different ***gamma*** values between 0.5 and 8 and use results that give the highest **pattern-agr-index** and **pattern-diff-agr-index** as returned in the output file.
 
-***saving\_freq***: the frequency (epochs) at which the model will be saved during the training process (Default to be 2000). One of the saved models will be determined optimal and used for deriving final results after the training procedure.
+***saving\_freq***: the frequency (epochs) at which the model will be saved during the training process (Default to be 1000). One of the saved models will be determined optimal and used for deriving final results after the training procedure.
 
 
 ```bash				    
@@ -101,7 +101,7 @@ After determining the optimal saving epoch, the repetition which has the highest
 
 Since the repetition training process may take a long training time on a normal desktop computer, the function enables early stop and later resumption. Users can set ***stop\_repetition*** to be an early stopping point and ***start\_repetition*** to be the starting repetition index. This will also enable the user to run several repetitions in parallel.
 
-The function automatically saves a csv file with clustering results and returns the same dataframe. The dataframe also includes the **path to the final selected model** (the model used for deriving final R-indices), **pattern c-index** among all repetitively derived results, as well as **selected model pattern c-index** (average concordance indices between the selected repetitions and all other repetitions.
+The function automatically saves a csv file with clustering results and returns the same dataframe. The dataframe also includes the **path to the final selected model** (the model used for deriving final R-indices), average **pattern-agr-index** and **pattern-diff-agr-index** across all repetitively derived results, as well as **selected model pattern-agr-index** and **selected model pattern-diff-agr-index**.
 
 **Two evaluation metrics used for measuring agreements between results and selecting the optimal model:**
 
