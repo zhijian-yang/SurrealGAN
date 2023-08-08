@@ -79,13 +79,14 @@ gamma = 6
 
 There are some hyper parameters need to be set by the user:
 
-***batch\_size***: Size of the batch for each training epoch. (Default to be 100) It is **necessary** to be reset to 1/8 - 1/10 of the PT sample size.
+***batch\_size***: Size of the batch for each training epoch. (Default to be 100) It is **necessary** to reset it to 1/8 - 1/10 of the PT sample size.
 
-***lam***: coefficient controlling the relative importance of cluster\_loss in the training objective function. (Default to be 0.2) It is **necessary** to try different ***lam*** values between 0.05 and 0.6 and use results that give the highest **pattern-agr-index** and **pattern-diff-agr-index** as returned in the output file.
+***lam***: coefficient controlling the relative importance of cluster\_loss in the training objective function. (Default to be 0.2) It is **necessary** to try different ***lam*** values between 0.05 and 0.6 and use the results that give the highest **pattern-agr-index** and **pattern-diff-agr-index** as returned in the output file.
 
-***gamma***: coefficient controlling the relative importance of change\_loss in training objective function. (Default to be 6). It is **necessary** to try different ***gamma*** values between 0.5 and 8 and use results that give the highest **pattern-agr-index** and **pattern-diff-agr-index** as returned in the output file.
+***gamma***: coefficient controlling the relative importance of change\_loss in training objective function. (Default to be 6). It is **necessary** to try different ***gamma*** values between 0.5 and 8 and use the results that give the highest **pattern-agr-index** and **pattern-diff-agr-index** as returned in the output file.
 
 ***saving\_freq***: the frequency (epochs) at which the model will be saved during the training process (Default to be 1000). One of the saved models will be determined to be optimal and used for deriving final results after the training procedure.
+
 
 
 ```bash				    
