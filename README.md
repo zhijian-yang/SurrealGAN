@@ -7,7 +7,7 @@ The fundamental framework of the basic Surreal-GAN model (Yang et al. 2022) inhe
  
 **We strongly encourage the users to upgrade to version 0.1.0.** 
 
-![image info](https://github.com/zhijian-yang/SurrealGAN/tree/main/datasets/SURREAL-GAN.png)
+![image info](./datasets/SURREAL-GAN.png)
 
 ## License
 Copyright (c) 2016 University of Pennsylvania. All rights reserved. See[ https://www.cbica.upenn.edu/sbia/software/license.html](https://www.cbica.upenn.edu/sbia/software/license.html)
@@ -119,9 +119,9 @@ To ensure optimal performance and flexibility in Surreal-GAN representation lear
 
 **Rindices-Correlation** is used as the metric for measuring agreements between results and selecting the optimal model. Specifically, it equals the means of the following two measurements:
 
-* **Dimension-correlation**: With M-dimensional R-indices derived by two different models defined as r<sup>1</sup> and r<sup>2</sup>, **Dimension-correlation** is defined as the average of M Pearson’s correlations for all dimensions: $\frac{1}{M}(\sum_{i=1}^M \rho(r_i^1,r_i^2))$.
+* **Dimension-correlation**: With M-dimensional R-indices derived by two different models defined as r<sup>1</sup> and r<sup>2</sup>, **Dimension-correlation** is defined as the average of M Pearson’s correlations for all dimensions: $`\frac{1}{M}(\sum_{i=1}^M \rho(r_i^1,r_i^2))`$.
 
-* **Difference-correlation**: With M-dimensional R-indices derived by two different models defined as r<sup>1</sup> and r<sup>2</sup>, **pattern-diff-agr-index** is defined as the average of M(M-1)/2 Pearson’s correlations for all pairs of dimensions: $\frac{2}{M(M-1)}(\sum_{i=1}^M \sum_{j=i+1}^M \rho(r_i^1-r_j^1,r_i^2-r_j^2))$
+* **Difference-correlation**: With M-dimensional R-indices derived by two different models defined as r<sup>1</sup> and r<sup>2</sup>, **pattern-diff-agr-index** is defined as the average of M(M-1)/2 Pearson’s correlations for all pairs of dimensions: $`\frac{2}{M(M-1)}(\sum_{i=1}^M \sum_{j=i+1}^M \rho(r_i^1-r_j^1,r_i^2-r_j^2))`$
 
 ## Main function for Model Training
 ```bash				    
