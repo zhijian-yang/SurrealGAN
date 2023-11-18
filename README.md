@@ -1,9 +1,13 @@
 # Surreal-GAN
-Surreal-GAN is a semi-supervised representation learning method that is designed to identify disease-related heterogeneity among the patient group.  Surreal-GAN parses complex disease-related imaging patterns into low dimensional representation indices (r-indices), with each dimension indicating the severity of one relatively homogeneous imaging pattern.
+Surreal-GAN is a semi-supervised representation learning method that is designed to identify disease-related heterogeneity among the patient group. Surreal-GAN parses complex disease-related imaging patterns into low-dimensional representation indices (r-indices), with each dimension indicating the severity of one relatively homogeneous imaging pattern.
 
-The key point of the Surreal-GAN model is modeling disease as a continuous process and learning infinite transformation directions from CN to PT, with each direction capturing a specific combination of patterns and severity. The idea is realized by learning one transformation function, f, which takes both normal data and a continuous latent variable as inputs and outputs synthesized-PT data whose distribution is indistinguishable from that of real PT data. (As shown in the schematic diagram) Several different regularizations were introduced to further guide the transformation function. An inverse function g, jointly trained with f, is used for deriving R-indices after the training process.
+The key point of the Surreal-GAN model is modeling disease as a continuous process and learning infinite transformation directions from CN to PT, with each direction capturing a specific combination of patterns and severity. The idea is realized by learning one transformation function, f, which takes both normal data and a continuous latent variable as inputs and outputs synthesized-PT data whose distribution is indistinguishable from that of real PT data. As shown in the schematic diagram, several different regularizations were introduced to further guide the transformation function. An inverse function g, jointly trained with f, is used for deriving R-indices after the training process.
 
-![image info](./datasets/SURREAL-GAN.png)
+The fundamental framework of the basic Surreal-GAN model (Yang et al. 2022) inherently encourages independence among the derived R-indices, limiting its applicability in various scenarios. Therefore, starting from Surreal-GAN 0.1.0, we have implemented an updated Surreal-GAN model (Yang et al. 2023). This enhanced Surreal-GAN incorporates a correlation structure among the R-indices within a reduced representation latent space. This modification allows the model to capture interactions among multiple underlying neuropathological processes.
+ 
+**We strongly encourage the users to upgrade to version 0.1.0.** 
+
+![image info](https://github.com/zhijian-yang/SurrealGAN/tree/main/datasets/SURREAL-GAN.png)
 
 ## License
 Copyright (c) 2016 University of Pennsylvania. All rights reserved. See[ https://www.cbica.upenn.edu/sbia/software/license.html](https://www.cbica.upenn.edu/sbia/software/license.html)
@@ -32,7 +36,7 @@ $ pip install SurrealGAN
 
 
 ## Input structure
-The main function of SurrealGAN basically takes two Panda dataframes as data inputs, **data** and **covariate** (optional). Columns with the names *'participant_id'* and *'diagnosis'* must exist in both dataframes. Some conventions for the group label/diagnosis: -1 represents healthy control (CN) and 1 represents patient (PT); categorical variables, such as sex, should be encoded as numbers: Female for 0 and Male for 1, for example.
+The main function of SurrealGAN basically takes two Panda dataframes as data inputs: **data** and **covariate** (optional). Columns with the names *'participant_id'* and *'diagnosis'* must exist in both dataframes. Some conventions for the group label/diagnosis: -1 represents healthy control (CN) and 1 represents patient (PT); categorical variables, such as sex, should be encoded as numbers: Female for 0 and Male for 1, for example.
 
 Example for **data**:
 
@@ -77,45 +81,114 @@ lam = 0.2
 gamma = 6
 ```
 
-There are some hyper parameters need to be set by the user:
+## Important Hyper-parameters
 
-***batch\_size***: Size of the batch for each training epoch. (Default to be 100) It is **necessary** to reset it to 1/8 - 1/10 of the PT sample size.
+To ensure optimal performance and flexibility in Surreal-GAN representation learning, users can adjust the following hyper-parameters according to their specific needs:
 
-***lam***: coefficient controlling the relative importance of cluster\_loss in the training objective function. (Default to be 0.2) It is **necessary** to try different ***lam*** values between 0.05 and 0.6 and use the results that give the highest **pattern-agr-index** and **pattern-diff-agr-index** as returned in the output file.
+### `batch_size`
 
-***gamma***: coefficient controlling the relative importance of change\_loss in training objective function. (Default to be 6). It is **necessary** to try different ***gamma*** values between 0.5 and 8 and use the results that give the highest **pattern-agr-index** and **pattern-diff-agr-index** as returned in the output file.
+- **Description:** Size of the batch for each training epoch
+- **Default:** 300
+- **Usage:** The default value is robust, but users can experiment and adjust based on Rindices-Correlation values.
 
-***saving\_freq***: the frequency (epochs) at which the model will be saved during the training process (Default to be 1000). One of the saved models will be determined to be optimal and used for deriving final results after the training procedure.
+### `lam`
 
+- **Description:** Coefficient controlling the relative importance of `cluster_loss` in the training objective function.
+- **Default:** 0.2
+- **Usage:** Try different `lam` values between 0.05 and 1.2. Use the results yielding the highest Rindices-Correlation as indicated in the output file.
 
+### `gamma`
 
+- **Description:** Coefficient controlling the relative importance of `change_loss` in the training objective function.
+- **Default:** 2
+- **Usage:** Experiment with different `gamma` values between 0.1 and 8. Select the results with the highest Rindices-Correlation as returned in the output file.
+
+### `saving_freq`
+
+- **Description:** Frequency (in epochs) at which the model will be saved during the training process. At the end of the training process, one of the saved epochs will be determined to be optimal. The optimal epoch is returned in the output file and used for deriving final results after the training procedure.
+- **Default:** 2000
+- **Usage:** The users could select `saving_freq` based on the sample size and `final_saving_epoch`.
+
+### `final_saving_epoch`
+
+- **Description:** The last epoch during training at which the model is saved, and beyond which the training process stops.
+- **Default:** NA
+- **Usage:** Users are required to select the value for `final_saving_epoch` based on their specific datasets. While a larger value of `final_saving_epoch` can ensure reaching the optimal epoch, it comes at the expense of longer training times. As outlined in the section **Main function for Model Training**, the optimal epoch is determined at the conclusion of the training process. If users train all repetitions in parallel, real-time monitoring of agreements among models allows for early stopping, even before reaching the set `final_saving_epoch`. However, when training repetitions sequentially, it is advisable for users to carefully choose `final_saving_epoch` to ensure the attainment of the best model agreements (measured by **Rindices-Correlation**).
+
+## Rindices-Correlation
+
+**Rindices-Correlation** is used as the metric for measuring agreements between results and selecting the optimal model. Specifically, it equals the means of the following two measurements:
+
+* **Dimension-correlation**: With M-dimensional R-indices derived by two different models defined as r<sup>1</sup> and r<sup>2</sup>, **Dimension-correlation** is defined as the average of M Pearson’s correlations for all dimensions: $\frac{1}{M}(\sum_{i=1}^M \rho(r_i^1,r_i^2))$.
+
+* **Difference-correlation**: With M-dimensional R-indices derived by two different models defined as r<sup>1</sup> and r<sup>2</sup>, **pattern-diff-agr-index** is defined as the average of M(M-1)/2 Pearson’s correlations for all pairs of dimensions: $\frac{2}{M(M-1)}(\sum_{i=1}^M \sum_{j=i+1}^M \rho(r_i^1-r_j^1,r_i^2-r_j^2))$
+
+## Main function for Model Training
 ```bash				    
-repetition_number = 20  # number of repetitions (at least 5 repetition\
+repetition_number = 30  # number of repetitions (at least 20 repetition\
 	   is need to give the most reliable and reproducible result)
 data_fraction = 1 # fraction of data used in each repetition
 repetitive_representation_learning(train_data, npattern, repetition_number, data_fraction, final_saving_epoch, max_epoch, output_dir, \
 		lr = 0.0008, batchsize=120, verbose=False, lipschitz_k=0.5, covariate= None, start_repetition=0, lam=lam, gamma = gamma)
 ```
 
-**repetitive\_representation\_learning** is the **main** function for representation learning via Surreal-GAN. It performs the representation learning process repetitively with a pre-defined number of repetitions. Each repetition will save models in a subfolder called "repetition_i", in which the model will be saved every ***saving\_freq*** epochs before the final\_saving\_epoch while saving criteria are satisfied. The function will automatically choose the optimal saving epochs via **pattern-agr-index** and **pattern-diff-agr-index** (explained below) among the results.
+The `repetitive_representation_learning` function is the cornerstone of representation learning using Surreal-GAN. It performs the repetitive training process with a user-defined number of repetitions.
 
-After determining the optimal saving epoch, the repetition which has the highest agreement (measured by the sum of **pattern-agr-index** and **pattern-diff-agr-index**) with all other repetitions will be used to derive the final R-indices. Given the randomness in training procedure, it is necessary to run **at least 10 repetitions** to derive a reliable and reproducible result. 
+### Process Description
 
-Since the repetition training process may take a long training time on a normal desktop computer, the function enables an early stop and later resumption. Users can set ***stop\_repetition*** to be an early stopping point and ***start\_repetition*** to be the starting repetition index. This will also enable the user to run several repetitions in parallel.
+- The function repetitively conducts the representation learning process with a pre-defined number of repetitions. Since representaiton learning is an unsupervised problem without ground truth, the agreements among repetitively trained models are used for evaluating model performance and selecting the optimal hyper-parameters. One of the repetitively trained models is determined to be optimal and used for deriving the final results. This process ensures the reliability and reproducibility of the derived R-indices. 
 
-The function automatically saves a CSV file with clustering results and returns the same dataframe. The dataframe also includes the **path to the final selected model** (the model used for deriving final R-indices), the average **pattern-agr-index** and **pattern-diff-agr-index** across all repetitively derived results, as well as the **selected model pattern-agr-index** and the **selected model pattern-diff-agr-index**.
+### Model Saving
 
-**Two evaluation metrics used for measuring agreements between results and selecting the optimal model:**
+- Repetitively trained models are saved in files named "model_i," with 'i' denoting the repetition index.
+- Saving occurs every `saving_freq` epoch, preceding the `final_saving_epoch` while adhering to set criteria.
 
-* **pattern-agr-index**: With M dimensional R-indices derived by two different models defined as r<sup>1</sup> and r<sup>2</sup>, **pattern-agr-index** is defined as the average of M concordance indices for all dimensions, C(r<sup>1</sup><sub>i</sub>, r<sup>2</sup><sub>i</sub>).
+### Optimal Saving Epoch and Repetition
 
-* **pattern-diff-agr-index**: With M dimensional R-indices derived by two different models defined as r<sup>1</sup> and r<sup>2</sup>, **pattern-diff-agr-index** is defined as the average of M(M-1)/2 concordance indices for differences among all dimensions, C(r<sup>1</sup><sub>i</sub>-r<sup>1</sup><sub>j</sub>, r<sup>2</sup><sub>i</sub>-r<sup>2</sup><sub>j</sub>).
+- The function automatically identifies the optimal saving epoch based on the highest mean **Rindices-Correlation** among the results.
+- After determining the optimal epoch, the model with the highest agreement (measured by **Rindices-Correlation**) with all other repetitions will be used to derive the final R-indices.
+- Given the randomness of the training procedure, it is necessary to run **at least 20 repetitions** to derive a reliable and reproducible result (i.e., set `repetition_numer` to be greater than 20). 
 
+### Parallel vs. Sequential Training
+Given the potentially prolonged duration of the repetitive training process on a standard desktop computer, the function provides an option for early stopping and later resumption. Users can set `stop_repetition` as an early stopping point and `start_repetition` to be the starting repetition index. 
+
+- **Sequential Training**: When start_repetition is set to 1 and stop_repetition is set to the total repetition number (`repetition_number`), the function will train all repetitions sequentially. This may result in an extended training time.
+- **Parellel Training**: Parallel Training: Setting start_repetition to 'i' and stop_repetition to 'i+1', where $1 \leq i <$ `repetition_number`, allows users to run multiple repetitions in parallel, particularly effective on HPC clusters.
+
+### Monitoring Training Process
+- Enabling verbose by setting it to True results in both printed updates of various losses and their saving in a 'results.txt' file. In most cases, verbose is set to False for efficiency.
+- Agreements among repetitively trained models are calculated at every `saving_freq` epoch and are saved in a real-time updated CSV file named 'model_agreements.csv'.
+ - In **Sequential Training**, the csv file will only be created and updated in the last repetition. 
+ - In **Parellel Training**, the training processes of all repetitions interactively update the CSV file, allowing more efficient real-time monitoring.
+
+
+
+## Output File
+Upon completion of all repetitions, the function automatically saves a CSV file and returns the same dataframe. The CSV file contains the following information:
+
+- **R-indices**: The derived R-indices of all PT participants in the training set. 
+- **Rindices-corr**: Agreements among repetitively trained models with the current hyperparameters, `gamma` and `lam`.
+- **best_epoch**: The most optimal epoch
+- **path to selected model**: The path to the most optimal model.
+- **selected model Rindices-corr**: Agreements between the optimal model and all the other repetitions.
+- **Dimension-correlation** and **Difference-correlation**: Two metrics used for calculating **Rindices-corr**
+- **selected model Dimension-correlation** and **selected model Difference-correlation**: Two metrics used for calculating **selected model Rindices-corr**
+
+## Model Application to out-of-sample Participants
 ```					    
 model_dir = 'PATH_TO_SAVED_MODEL' #the path to the final selected model (the one returned by function "repetitive_representation_learning")
-r_indices = apply_saved_model(model_dir, train_data, covariate=None)
+r_indices = apply_saved_model(model_dir, application_data, epoch ,application_covariate=None)
 ```
-**apply\_saved\_model** is a function used for deriving representation (R-indices) for **new patient data** using a previously saved model. Input data and covariate (optional) should be Panda dataframes with the same format shown before. Only PT data, for which the users want to derive R-indices, needs to be provided with diagnoses set to 1. PT data can be any sample inside or outside of the training set. ***The function returns R-indices of PT data following the order of PT in the provided dataframe.***
+**apply\_saved\_model** is a function used for deriving R-indices for **new patient data** using a previously saved model. 
+
+### Input Data
+- **Application data**: Only PT data, for which the users want to derive R-indices, needs to be provided with diagnoses set to 1. PT data can be any sample inside or outside of the training set. It should be in the form of Panda dataframes with the same format as training data. 
+- **Application covariate**: (Optional) Users should provide the same covariate sets to the training data. It should be in the same format as the training covariates. 
+- **model_dir**: The path to the model to be applied. Generally, it should be **path to selected model** provided in the output CSV file.
+- **epoch**: The corresponding **best_epoch** provided in the output CSV file.
+
+### Output
+The function returns R-indices of PT data following the order of PT in the provided dataframe.
 
 
 ## Citation
