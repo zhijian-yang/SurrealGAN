@@ -1,3 +1,4 @@
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from .modules import TwoInputSequential, Sub_Adder
@@ -40,6 +41,11 @@ def define_Linear_Decomposer(nROI,nPattern):
     netD.apply(weights_init)
     return netD
 
+def define_Latent_Corr(ndim):
+    netL = LLatentCorr(ndim)
+    netL.apply(weights_init)
+    return netL
+
 ##############################################################################
 # Network Classes
 ##############################################################################
@@ -69,7 +75,6 @@ class LEncoder(nn.Module):
         self.nPattern = nPattern
         def block(in_layer, out_layer, normalize=True):
             layers=[]
-            #layers.append(nn.BatchNorm1d(in_layer, 0.8))
             layers.append(nn.LeakyReLU(0.2, inplace=True))
             layers.append(nn.Linear(in_layer, out_layer))
             return layers
@@ -112,6 +117,18 @@ class LDiscriminator(nn.Module):
         )
     def forward(self, input_y):
         pred = self.model(input_y)
+        return pred
+
+class LLatentCorr(nn.Module):
+    def __init__(self, ndim):
+        super(LLatentCorr, self).__init__()
+        self.model = nn.Sequential(
+            nn.Linear(1, ndim,bias=False),
+            nn.LeakyReLU(0.2, inplace=True),
+            nn.Linear(ndim, ndim,bias=False),
+        )
+    def forward(self):
+        pred =F.tanh(self.model(nn.Parameter(torch.tensor([1.]))))
         return pred
 
 

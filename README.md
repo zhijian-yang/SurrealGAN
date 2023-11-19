@@ -155,7 +155,7 @@ The `repetitive_representation_learning` function is the cornerstone of represen
 Given the potentially prolonged duration of the repetitive training process on a standard desktop computer, the function provides an option for early stopping and later resumption. Users can set `stop_repetition` as an early stopping point and `start_repetition` to be the starting repetition index. 
 
 - **Sequential Training**: When start_repetition is set to 1 and stop_repetition is set to the total repetition number (`repetition_number`), the function will train all repetitions sequentially. This may result in an extended training time.
-- **Parellel Training**: Parallel Training: Setting start_repetition to 'i' and stop_repetition to 'i+1', where $1 \leq i <$ `repetition_number`, allows users to run multiple repetitions in parallel, particularly effective on HPC clusters.
+- **Parellel Training**: Parallel Training: Setting start_repetition to 'i' and stop_repetition to 'i+1', where $1 \leq i \leq$ `repetition_number`, allows users to run multiple repetitions in parallel, particularly effective on HPC clusters.
 
 ### Monitoring Training Process
 - Enabling verbose by setting it to True results in both printed updates of various losses and their saving in a 'results.txt' file. In most cases, verbose is set to False for efficiency.
