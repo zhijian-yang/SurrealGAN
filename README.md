@@ -95,7 +95,7 @@ To ensure optimal performance and flexibility in Surreal-GAN representation lear
 
 - **Description:** Coefficient controlling the relative importance of `cluster_loss` in the training objective function.
 - **Default:** 0.2
-- **Usage:** Try different `lam` values between 0.05 and 1.2. Use the results yielding the highest Rindices-Correlation as indicated in the output file.
+- **Usage:** Try different `lam` values between 0.05 and 1.6. Use the results yielding the highest Rindices-Correlation as indicated in the output file.
 
 ### `gamma`
 
@@ -107,13 +107,13 @@ To ensure optimal performance and flexibility in Surreal-GAN representation lear
 
 - **Description:** Frequency (in epochs) at which the model will be saved during the training process. At the end of the training process, one of the saved epochs will be determined to be optimal. The optimal epoch is returned in the output file and used for deriving final results after the training procedure.
 - **Default:** 2000
-- **Usage:** The users could select `saving_freq` based on the sample size and `final_saving_epoch`.
+- **Usage:** The users could select `saving_freq` based on the sample size and `final_saving_epoch`, (Recommend: 1/40-1/20 of `final_saving_epoch`). 
 
 ### `final_saving_epoch`
 
 - **Description:** The last epoch during training at which the model is saved, and beyond which the training process stops.
 - **Default:** NA
-- **Usage:** Users are required to select the value for `final_saving_epoch` based on their specific datasets. While a larger value of `final_saving_epoch` can ensure reaching the optimal epoch, it comes at the expense of longer training times. As outlined in the section **Main function for Model Training**, the optimal epoch is determined at the conclusion of the training process. If users train all repetitions in parallel, real-time monitoring of agreements among models allows for early stopping, even before reaching the set `final_saving_epoch`. However, when training repetitions sequentially, it is advisable for users to carefully choose `final_saving_epoch` to ensure the attainment of the best model agreements (measured by **Rindices-Correlation**).
+- **Usage:** Users are required to select the value for `final_saving_epoch` based on their specific datasets. While a larger value of `final_saving_epoch` can ensure reaching the optimal epoch, it comes at the expense of longer training times. As outlined in the section **Main function for Model Training**, the optimal epoch is determined at the conclusion of the training process. If users train all repetitions in parallel, real-time monitoring of agreements among models allows for early stopping, even before reaching the set `final_saving_epoch`. However, when training repetitions sequentially, it is advisable for users to carefully choose `final_saving_epoch` to ensure the attainment of the best model agreements (measured by **Rindices-Correlation**), (Recommend: 1500000*(300/patient\_sample\_size)).
 
 ## Rindices-Correlation
 

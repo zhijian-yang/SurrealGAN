@@ -71,7 +71,7 @@ def representation_result(output_dir, npattern, data, final_saving_epoch, saving
 
 def repetitive_representation_learning(data, npattern, repetition, fraction, final_saving_epoch, output_dir, mono_loss_threshold=0.006, saving_freq = 2000,\
 		recons_loss_threshold=0.003, covariate=None, lam=0.2, zeta=80, kappa=80, gamma=2, mu=500, eta=6, alpha = 0.02, batchsize=300, lipschitz_k = 0.5, verbose = False, \
-		beta1 = 0.5, lr = 0.0008, max_gnorm = 100, eval_freq = 100,  start_repetition = 0, stop_repetition = None):
+		beta1 = 0.5, lr = 0.0008, max_gnorm = 100, eval_freq = 100,  start_repetition = 0, stop_repetition = None, early_stop_thresh = 0.02):
 	"""
 	Args:
 		data: dataframe, dataframe file with all ROI (input features) The dataframe contains
@@ -117,7 +117,7 @@ def repetitive_representation_learning(data, npattern, repetition, fraction, fin
 
 	Surreal_GAN_model = Surreal_GAN_train(npattern, final_saving_epoch, recons_loss_threshold, mono_loss_threshold, \
 		lam=lam, zeta=zeta, kappa=kappa, gamma=gamma, mu=mu, eta=eta, alpha=alpha, batchsize=batchsize, \
-		lipschitz_k = lipschitz_k, beta1 = beta1, lr = lr, max_gnorm = max_gnorm, eval_freq = eval_freq, saving_freq = saving_freq)
+		lipschitz_k = lipschitz_k, beta1 = beta1, lr = lr, max_gnorm = max_gnorm, eval_freq = eval_freq, saving_freq = saving_freq, early_stop_thresh = early_stop_thresh)
 
 	if stop_repetition == None:
 		stop_repetition = repetition

@@ -27,7 +27,7 @@ class Surreal_GAN_train():
 	
 	def __init__(self, npattern, final_saving_epoch, recons_loss_threshold, mono_loss_threshold, \
 		lam=0.2, zeta=80, kappa=80, gamma=6, mu=500, eta=6, alpha = 0.05, batchsize=25, lipschitz_k = 0.5, \
-		beta1 = 0.5, lr = 0.0002, max_gnorm = 100, eval_freq = 100, print_freq = 1000, saving_freq = 1000):
+		beta1 = 0.5, lr = 0.0002, max_gnorm = 100, eval_freq = 100, print_freq = 1000, saving_freq = 1000, early_stop_thresh = 0.02):
 		self.opt=dotdict({})
 		self.opt.npattern = npattern
 		self.opt.final_saving_epoch = final_saving_epoch
@@ -48,6 +48,7 @@ class Surreal_GAN_train():
 		self.opt.print_freq = print_freq
 		self.opt.eval_freq = eval_freq
 		self.opt.saving_freq = saving_freq
+		self.opt.early_stop_thresh = early_stop_thresh
 
 	def print_log(self, result_f, message):
 		result_f.write(message+"\n")
@@ -148,7 +149,7 @@ class Surreal_GAN_train():
 						dimension_corr, difference_corr = agreement_list[1], agreement_list[0]
 						Rindices_corr = [(a + b)/2 for a, b in zip(dimension_corr, difference_corr)]
 						best_model = Rindices_corr.index(max(Rindices_corr))
-						if (agreement_f.iloc[:-2]['Rindices_corr'].max()-0.01)>max(agreement_f.iloc[-2:]['Rindices_corr'].max(),(np.mean(dimension_corr)+np.mean(difference_corr))/2):
+						if (agreement_f.iloc[:-2]['Rindices_corr'].max()-self.opt.early_stop_thresh)>max(agreement_f.iloc[-2:]['Rindices_corr'].max(),(np.mean(dimension_corr)+np.mean(difference_corr))/2):
 							stop = 'yes'
 						else:
 							stop = 'no'
