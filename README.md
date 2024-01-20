@@ -130,7 +130,7 @@ $$\frac{2}{M(M-1)}(\sum_{i=1}^M \sum_{j=i+1}^M \rho(r_i^1-r_j^1,r_i^2-r_j^2))$$
 repetition_number = 30  # number of repetitions (at least 20 repetition\
 	   is need to give the most reliable and reproducible result)
 data_fraction = 1 # fraction of data used in each repetition
-repetitive_representation_learning(train_data, npattern, repetition_number, data_fraction, final_saving_epoch, max_epoch, output_dir, \
+repetitive_representation_learning(train_data, npattern, repetition_number, data_fraction, final_saving_epoch, output_dir, \
 		lr = 0.0008, batchsize=120, verbose=False, lipschitz_k=0.5, covariate= None, start_repetition=0, lam=lam, gamma = gamma)
 ```
 
