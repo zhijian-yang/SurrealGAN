@@ -18,14 +18,13 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ),
-    install_requires=[         
-        'numpy>=1.22.3',
-        'tqdm>=4.50.2',
-        'torch==1.10.2',
-        'scikit-learn>=0.24.2',
-        'scipy>=1.8.0',
-        'pandas>=1.4.2',
-        'lifelines>=0.26.3'
-    ]
+    install_requires=[
+        "numpy>=1.22.3",
+        "tqdm>=4.50.2",
+        "torch==1.10.2",
+        "scikit-learn>=0.24.2",
+        "scipy>=1.8.0",
+        "pandas>=1.4.2",
+        "lifelines>=0.26.3",
+    ],
 )
-
