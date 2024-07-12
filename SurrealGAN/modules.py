@@ -1,3 +1,5 @@
+from typing import Any
+
 import torch
 import torch.nn as nn
 
@@ -10,19 +12,20 @@ __maintainer__ = "Zhijian Yang"
 __email__ = "zhijianyang@outlook.com"
 __status__ = "Development"
 
+
 class TwoInputModule(nn.Module):
-    def forward(self, input1, input2):
+    def forward(self, input1: Any, input2: Any) -> NotImplementedError:
         raise NotImplementedError
 
 
 class TwoInputSequential(nn.Sequential, TwoInputModule):
-    def __init__(self, *args):
+    def __init__(self, *args):  # type: ignore
         super(TwoInputSequential, self).__init__(*args)
 
-    def forward(self, input1, input2):
-        ## overloads forward function in parent class
+    def forward(self, input1, input2):  # type: ignore
+        # overloads forward function in parent class
         for module in self._modules.values():
-            if isinstance(module, TwoInputModule): #check whether it is twoinputmodule
+            if isinstance(module, TwoInputModule):  # check whether it is twoinputmodule
                 input1 = module.forward(input1, input2)
             else:
                 input1 = module.forward(input1)
@@ -30,18 +33,13 @@ class TwoInputSequential(nn.Sequential, TwoInputModule):
 
 
 class Sub_Adder(TwoInputModule):
-    def __init__(self, x_dim, z_dim):
+    def __init__(self, x_dim, z_dim):  # type: ignore
         super(Sub_Adder, self).__init__()
         self.add_noise = nn.Sequential(
             nn.Linear(z_dim, x_dim),
         )
 
-    def forward(self, input, noise):
-        #multiplier = self.add_noise.forward(noise)
+    def forward(self, input, noise):  # type: ignore
+        # multiplier = self.add_noise.forward(noise)
         multiplier = torch.sigmoid(self.add_noise.forward(noise))
-        return input*multiplier
-
-
-
-
-
+        return input * multiplier
