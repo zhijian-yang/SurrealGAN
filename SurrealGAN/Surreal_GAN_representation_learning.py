@@ -90,7 +90,7 @@ def repetitive_representation_learning(
     lam: float = 0.2,
     zeta: int = 80,
     kappa: int = 80,
-    gamma: int = 2,
+    gamma: float = 2.0,
     mu: int = 500,
     eta: int = 6,
     alpha: float = 0.02,
