@@ -31,8 +31,8 @@ def define_Linear_Mapping(nROI, nPattern):  # type: ignore
     return netG
 
 
-def define_Linear_Discriminator(nROI, nPattern):  # type: ignore
-    netD = LDiscriminator(nROI, nPattern)
+def define_Linear_Discriminator(nROI):  # type: ignore
+    netD = LDiscriminator(nROI)
     netD.apply(weights_init)
     return netD
 

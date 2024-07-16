@@ -120,9 +120,7 @@ class SurrealGAN(object):
         self.netReconstruction = define_Linear_Reconstruction(
             self.opt.nROI, self.opt.npattern
         )
-        self.netDiscriminator = define_Linear_Discriminator(
-            self.opt.nROI, self.opt.npattern
-        )
+        self.netDiscriminator = define_Linear_Discriminator(self.opt.nROI)
         self.netDecomposer = define_Linear_Decomposer(self.opt.nROI, self.opt.npattern)
         tril_indices = torch.tril_indices(
             row=self.opt.npattern, col=self.opt.npattern, offset=0
@@ -361,9 +359,7 @@ class SurrealGAN(object):
         self.netReconstruction = define_Linear_Reconstruction(
             self.opt.nROI, self.opt.npattern
         )
-        self.netDiscriminator = define_Linear_Discriminator(
-            self.opt.nROI, self.opt.npattern
-        )
+        self.netDiscriminator = define_Linear_Discriminator(self.opt.nROI)
         self.netDecomposer = define_Linear_Decomposer(self.opt.nROI, self.opt.npattern)
         tril_indices = torch.tril_indices(
             row=self.opt.npattern, col=self.opt.npattern, offset=0
