@@ -1,4 +1,5 @@
 import math
+from typing import Any
 
 import torch
 import torch.nn.functional as f
@@ -21,20 +22,20 @@ class normal_cdf(Transform):
     bijective = True
     sign = +1
 
-    def __eq__(self, other):  # type: ignore
+    def __eq__(self, other: Any) -> bool:
         return isinstance(other, normal_cdf)
 
-    def _call(self, x):  # type: ignore
+    def _call(self, x: torch.Tensor) -> torch.Tensor:
         return torch.special.ndtr(x)
 
-    def _inverse(self, y):  # type: ignore
+    def _inverse(self, y: torch.Tensor) -> torch.Tensor:
         return torch.special.ndtri(y)
 
-    def log_abs_det_jacobian(self, x, y):  # type: ignore
+    def log_abs_det_jacobian(self, x: float, y: float) -> Any:
         return -0.5 * math.log(2 * math.pi) - torch.square(x) / 2.0
 
 
-def construct_scale_tril(vector, ncluster):  # type: ignore
+def construct_scale_tril(vector: torch.Tensor, ncluster: int) -> torch.Tensor:
     L = torch.zeros((ncluster, ncluster))
     tril_indices = torch.tril_indices(row=ncluster, col=ncluster, offset=0)
     L[tril_indices[0], tril_indices[1]] = vector
@@ -45,7 +46,7 @@ def construct_scale_tril(vector, ncluster):  # type: ignore
     return scale_tril
 
 
-def construct_corr_matrix(vector, ncluster):  # type: ignore
+def construct_corr_matrix(vector: torch.Tensor, ncluster: int) -> torch.Tensor:
     corr_matrix = torch.ones((ncluster, ncluster))
     tril_indices = torch.tril_indices(row=ncluster, col=ncluster, offset=-1)
     triu_indices = torch.triu_indices(row=ncluster, col=ncluster, offset=1)
@@ -54,7 +55,9 @@ def construct_corr_matrix(vector, ncluster):  # type: ignore
     return corr_matrix
 
 
-def guassian_colula_distribution(scale_tril, ncluster):  # type: ignore
+def guassian_colula_distribution(
+    scale_tril: torch.Tensor, ncluster: int
+) -> torch.distributions.TransformedDistribution:
     base_distribution = torch.distributions.multivariate_normal.MultivariateNormal(
         torch.zeros(ncluster), scale_tril=scale_tril
     )
