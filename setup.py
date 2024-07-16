@@ -13,11 +13,11 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/zhijian-yang/SurrealGAN",
     packages=setuptools.find_packages(),
-    classifiers=(
+    classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
-    ),
+    ],
     install_requires=[
         "numpy>=1.22.3",
         "tqdm>=4.50.2",
