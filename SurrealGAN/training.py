@@ -1,12 +1,14 @@
 import os
 import time
+from typing import Any, TextIO
 
 import numpy as np
+import pandas
 import pandas as pd
 from torch.autograd import Variable
 from tqdm import tqdm
 
-from .model import SurrealGAN
+from .model import SurrealGAN, dotdict
 from .utils import check_multimodel_agreement, parse_train_data, parse_validation_data
 
 __author__ = "Zhijian Yang"
@@ -19,38 +21,30 @@ __email__ = "zhijianyang@outlook.com"
 __status__ = "Development"
 
 
-class dotdict(dict):
-    """dot.notation access to dictionary attributes"""
-
-    __getattr__ = dict.get
-    __setattr__ = dict.__setitem__  # type: ignore
-    __delattr__ = dict.__delitem__  # type: ignore
-
-
 class Surreal_GAN_train:
 
-    def __init__(  # type: ignore
+    def __init__(
         self,
-        npattern,
-        final_saving_epoch,
-        recons_loss_threshold,
-        mono_loss_threshold,
-        lam=0.2,
-        zeta=80,
-        kappa=80,
-        gamma=6,
-        mu=500,
-        eta=6,
-        alpha=0.05,
-        batchsize=25,
-        lipschitz_k=0.5,
-        beta1=0.5,
-        lr=0.0002,
-        max_gnorm=100,
-        eval_freq=100,
-        print_freq=1000,
-        saving_freq=1000,
-        early_stop_thresh=0.02,
+        npattern: int,
+        final_saving_epoch: int,
+        recons_loss_threshold: float,
+        mono_loss_threshold: float,
+        lam: float = 0.2,
+        zeta: float = 80,
+        kappa: float = 80,
+        gamma: float = 6,
+        mu: float = 500,
+        eta: float = 6,
+        alpha: float = 0.05,
+        batchsize: float = 25,
+        lipschitz_k: float = 0.5,
+        beta1: float = 0.5,
+        lr: float = 0.0002,
+        max_gnorm: float = 100,
+        eval_freq: float = 100,
+        print_freq: int = 1000,
+        saving_freq: int = 1000,
+        early_stop_thresh: float = 0.02,
     ):
         self.opt = dotdict({})
         self.opt.npattern = npattern
@@ -74,12 +68,16 @@ class Surreal_GAN_train:
         self.opt.saving_freq = saving_freq
         self.opt.early_stop_thresh = early_stop_thresh
 
-    def print_log(self, result_f, message):  # type: ignore
+    @staticmethod
+    def print_log(result_f: TextIO, message: str) -> None:
         result_f.write(message + "\n")
         result_f.flush()
         print(message)
 
-    def format_log(self, epoch, epoch_iter, measures, t, prefix=True):  # type: ignore
+    @staticmethod
+    def format_log(
+        epoch: int, epoch_iter: int, measures: dict, t: float, prefix: bool = True
+    ) -> str:
         message = "(epoch: %d, iters: %d, time: %.3f) " % (epoch, epoch_iter, t)
         if not prefix:
             message = " " * len(message)
@@ -87,16 +85,22 @@ class Surreal_GAN_train:
             message += "%s: %.4f " % (key, value)
         return message
 
-    def parse_data(self, data, covariate, random_seed, data_fraction):  # type: ignore
+    def parse_data(
+        self,
+        data: pandas.DataFrame,
+        covariate: Any,
+        random_seed: float,
+        data_fraction: int,
+    ) -> Any:
         (
             cn_train_dataset,
             pt_train_dataset,
             correction_variables,
             normalization_variables,
-        ) = parse_train_data(
-            data, covariate, random_seed, data_fraction, self.opt.batchsize
+        ) = parse_train_data(  # type: ignore
+            data, covariate, random_seed, data_fraction, self.opt.batchsize  # type: ignore
         )
-        cn_eval_dataset, pt_eval_dataset = parse_validation_data(
+        cn_eval_dataset, pt_eval_dataset = parse_validation_data(  # type: ignore
             data, covariate, correction_variables, normalization_variables
         )
         self.opt.nROI = pt_eval_dataset.shape[1]
@@ -110,16 +114,16 @@ class Surreal_GAN_train:
             normalization_variables,
         )
 
-    def train(  # type: ignore
+    def train(
         self,
-        data,
-        covariate,
-        save_dir,
-        repetition,
-        random_seed=0,
-        data_fraction=1,
-        verbose=True,
-    ):
+        data: pandas.DataFrame,
+        covariate: Any,
+        save_dir: str,
+        repetition: int,
+        random_seed: float = 0.0,
+        data_fraction: int = 1,
+        verbose: bool = True,
+    ) -> bool:
         if verbose:
             result_f = open("%s/results.txt" % save_dir, "w")
 
@@ -149,27 +153,29 @@ class Surreal_GAN_train:
         ]  # number of consecutive epochs with aq and cluster_loss < threshold
         # predicted_label_past = np.zeros(self.opt.n_val_data)
 
-        if self.opt.final_saving_epoch % self.opt.saving_freq == 0:
+        if self.opt.final_saving_epoch % self.opt.saving_freq == 0:  # type: ignore
             save_epoch = [
-                i * self.opt.saving_freq
+                i * self.opt.saving_freq  # type: ignore
                 for i in range(
-                    2, self.opt.final_saving_epoch // self.opt.saving_freq + 1
+                    2, self.opt.final_saving_epoch // self.opt.saving_freq + 1  # type: ignore
                 )
             ]
         else:
             save_epoch = [
-                i * self.opt.saving_freq
+                i * self.opt.saving_freq  # type: ignore
                 for i in range(
-                    2, self.opt.final_saving_epoch // self.opt.saving_freq + 1
+                    2, self.opt.final_saving_epoch // self.opt.saving_freq + 1  # type: ignore
                 )
-            ] + [self.opt.final_saving_epoch]
+            ] + [
+                self.opt.final_saving_epoch  # type: ignore
+            ]
         save_epoch_index = 0
         if not os.path.exists(save_dir):
             os.makedirs(save_dir)
 
         if not verbose:
-            pbar = tqdm(total=self.opt.final_saving_epoch + 2000)
-        for epoch in range(1, self.opt.final_saving_epoch + 2001):
+            pbar = tqdm(total=self.opt.final_saving_epoch + 2000)  # type: ignore
+        for epoch in range(1, self.opt.final_saving_epoch + 2001):  # type: ignore
             if not verbose:
                 pbar.update(1)
             # epoch_start_time = time.time()
@@ -178,20 +184,20 @@ class Surreal_GAN_train:
                 cn_data = cn_train_dataset.next()
                 real_X, real_Y = Variable(cn_data["x"]), Variable(pt_data["y"])
 
-                total_steps += self.opt.batchsize
-                epoch_iter += self.opt.batchsize
+                total_steps += self.opt.batchsize  # type: ignore
+                epoch_iter += self.opt.batchsize  # type: ignore
 
-                losses = model.train_instance(real_X, real_Y, self.opt.alpha)
+                losses = model.train_instance(real_X, real_Y, self.opt.alpha)  # type: ignore
 
-                if total_steps % self.opt.print_freq == 0:
-                    t = (time.time() - print_start_time) / self.opt.batchsize
+                if total_steps % self.opt.print_freq == 0:  # type: ignore
+                    t = (time.time() - print_start_time) / self.opt.batchsize  # type: ignore
                     if verbose:
                         self.print_log(
                             result_f, self.format_log(epoch, epoch_iter, losses, t)
                         )
                         print_start_time = time.time()
 
-            if epoch % self.opt.eval_freq == 0:
+            if epoch % self.opt.eval_freq == 0:  # type: ignore
                 t = time.time()
 
                 loss_names = ["loss_recons", "loss_mono"]
@@ -205,8 +211,8 @@ class Surreal_GAN_train:
                 res_str_list = ["[%d], TIME: %.4f" % (epoch, t)]
 
                 if (
-                    max(criterion_loss_list[0]) < self.opt.recons_loss_threshold
-                    and max(criterion_loss_list[1]) < self.opt.mono_loss_threshold
+                    max(criterion_loss_list[0]) < self.opt.recons_loss_threshold  # type: ignore
+                    and max(criterion_loss_list[1]) < self.opt.mono_loss_threshold  # type: ignore
                     and epoch > save_epoch[save_epoch_index]
                 ):
                     model.save(
@@ -216,13 +222,13 @@ class Surreal_GAN_train:
                     )
                     res_str_list += ["*** Saving Criterion Satisfied ***"]
                     res_str = "\n".join(["-" * 60] + res_str_list + ["-" * 60])
-                    agreement_list = check_multimodel_agreement(
+                    agreement_list = check_multimodel_agreement(  # type: ignore
                         data,
                         covariate,
                         save_dir,
                         save_epoch[save_epoch_index],
                         repetition,
-                        self.opt.npattern,
+                        self.opt.npattern,  # type: ignore
                     )
                     if os.path.exists(os.path.join(save_dir, "model_agreements.csv")):
                         agreement_f = pd.read_csv(
@@ -253,7 +259,7 @@ class Surreal_GAN_train:
                         best_model = Rindices_corr.index(max(Rindices_corr))
                         if (
                             agreement_f.iloc[:-2]["Rindices_corr"].max()
-                            - self.opt.early_stop_thresh
+                            - self.opt.early_stop_thresh  # type: ignore
                         ) > max(
                             agreement_f.iloc[-2:]["Rindices_corr"].max(),
                             (np.mean(dimension_corr) + np.mean(difference_corr)) / 2,
