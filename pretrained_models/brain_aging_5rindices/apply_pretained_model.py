@@ -2,7 +2,7 @@ import os
 
 import pandas as pd
 
-from SurrealGAN.SurrealGAN.Surreal_GAN_representation_learning import apply_saved_model
+from SurrealGAN.SurrealGAN.utils import apply_saved_model
 
 application_roi = pd.read_csv(
     "ROI_volume_file.csv"
