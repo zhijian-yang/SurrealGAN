@@ -1,7 +1,9 @@
 import itertools
 import os
+from typing import List, Optional, Tuple, Union
 
 import numpy as np
+import pandas
 import torch
 from scipy.stats import pearsonr
 from sklearn.linear_model import LinearRegression
@@ -24,7 +26,9 @@ __email__ = "zhijianyang@outlook.com"
 __status__ = "Development"
 
 
-def Covariate_correction(cn_data, cn_cov, pt_data, pt_cov):  # type: ignore
+def Covariate_correction(
+    cn_data: np.ndarray, cn_cov: np.ndarray, pt_data: np.ndarray, pt_cov: np.ndarray
+) -> Tuple[np.ndarray, np.ndarray, dict]:
     """
     Eliminate the confound of covariate, such as age and sex, from the disease-based changes.
     :param cn_data: array, control data
@@ -44,7 +48,9 @@ def Covariate_correction(cn_data, cn_cov, pt_data, pt_cov):  # type: ignore
     return corrected_cn_data, corrected_pt_data, correction_variables
 
 
-def Data_normalization(cn_data, pt_data):  # type: ignore
+def Data_normalization(
+    cn_data: np.ndarray, pt_data: np.ndarray
+) -> Tuple[np.ndarray, np.ndarray, dict]:
     """
     Normalize all data with respect to control data to ensure a mean of 1 and std of 0.1
     among CN participants for each ROI
@@ -60,7 +66,9 @@ def Data_normalization(cn_data, pt_data):  # type: ignore
     return normalized_cn_data, normalized_pt_data, normalization_variables
 
 
-def apply_covariate_correction(data, covariate, correction_variables):  # type: ignore
+def apply_covariate_correction(
+    data: np.ndarray, covariate: np.ndarray, correction_variables: dict
+) -> np.ndarray:
     covariate = (covariate - correction_variables["min_cov"]) / (
         correction_variables["max_cov"] - correction_variables["min_cov"]
     )
@@ -68,14 +76,22 @@ def apply_covariate_correction(data, covariate, correction_variables):  # type: 
     return corrected_data
 
 
-def apply_data_normalization(data, normalization_variables):  # type: ignore
+def apply_data_normalization(
+    data: np.ndarray, normalization_variables: dict
+) -> np.ndarray:
     normalized_data = 1 + (data - normalization_variables["cn_mean"]) / (
         10 * normalization_variables["cn_std"]
     )
     return normalized_data
 
 
-def parse_train_data(data, covariate, random_seed, data_fraction, batch_size):  # type: ignore
+def parse_train_data(
+    data: np.ndarray,
+    covariate: np.ndarray,
+    random_seed: float,
+    data_fraction: int,
+    batch_size: int,
+) -> Tuple:
     cn_data = (
         data.loc[data["diagnosis"] == -1]
         .drop(["participant_id", "diagnosis"], axis=1)
@@ -118,9 +134,12 @@ def parse_train_data(data, covariate, random_seed, data_fraction, batch_size):  
     )
 
 
-def parse_validation_data(  # type: ignore
-    data, covariate, correction_variables, normalization_variables
-):
+def parse_validation_data(
+    data: np.ndarray,
+    covariate: np.ndarray,
+    correction_variables: dict,
+    normalization_variables: dict,
+) -> Union[torch.Tensor, Tuple[torch.Tensor, torch.Tensor]]:
     cn_data = (
         data.loc[data["diagnosis"] == -1]
         .drop(["participant_id", "diagnosis"], axis=1)
@@ -163,33 +182,40 @@ def parse_validation_data(  # type: ignore
         return pt_eval_dataset
 
 
-def apply_saved_model(model_dir, data, epoch, covariate=None):  # type: ignore
+def apply_saved_model(
+    model_dir: str,
+    data: pandas.DataFrame,
+    epoch: int,
+    covariate: Optional[pandas.DataFrame],
+) -> np.ndarray:
     """
     Function used for derive representation results from one saved model
     Args:
             model_dir: string, path to the saved data
-            data, data_frame, dataframe with same format as training data. PT data can be any samples in or out of the training set.
-            covariate, data_frame, dataframe with same format as training covariate. PT data can be any samples in or out of the training set.
+            data: dataframe with same format as training data. PT data can be any samples in or out of the training set.
+            covariate: data_frame, dataframe with same format as training covariate. PT data can be any samples in or out of the training set.
+            epoch: int, the training epoch
     Returns: R-indices
-
     """
     data = data[data["diagnosis"] == 1]
     if covariate is not None:
         covariate = covariate[covariate["diagnosis"] == 1]
     model = SurrealGAN()
     model.load(model_dir, epoch)
-    model.get_corr()
+    model.get_corr()  # type: ignore
     validation_data = parse_validation_data(
         data,
         covariate,
-        model.opt.correction_variables,
-        model.opt.normalization_variables,
+        model.opt.correction_variables,  # type: ignore
+        model.opt.normalization_variables,  # type: ignore
     )
     model.predict_rindices(validation_data)
     return model.predict_rindices(validation_data)
 
 
-def calculate_pair_wise_correlation(r1, r2, npattern):  # type: ignore
+def calculate_pair_wise_correlation(
+    r1: np.ndarray, r2: np.ndarray, npattern: int
+) -> Tuple[float, float]:
     # function for calculating pair-wise correlations between two saved models
     order_permutation = list(itertools.permutations(range(npattern)))
     corr = [0 for _ in range(npattern)]
@@ -205,7 +231,7 @@ def calculate_pair_wise_correlation(r1, r2, npattern):  # type: ignore
             order_correlation[j] = order_dic[str(j) + str(order_permutation[i][j])]
         if np.mean(order_correlation) > np.mean(corr):
             corr = np.mean(order_correlation)
-            best_order = order_permutation[i]
+            best_order = order_permutation[i]  # type: ignore
     corr = [0 for _ in range(npattern)]
     for j in range(npattern):
         corr[j] = pearsonr(r1[:, j], r2[:, best_order[j]])[0]
@@ -219,10 +245,12 @@ def calculate_pair_wise_correlation(r1, r2, npattern):  # type: ignore
     return diff_corr / len(pairs), np.mean(corr)
 
 
-def calculate_group_compare_correlation(prediction_rindices, npattern):  # type: ignore
+def calculate_group_compare_correlation(
+    prediction_rindices: List, npattern: int
+) -> Tuple:
     # function for calculating dimension-correlation and difference-correlation among a groups of predicted r-indices
-    diff_corr = [[] for _ in range(len(prediction_rindices))]
-    dimnesion_corr = [[] for _ in range(len(prediction_rindices))]
+    diff_corr: List[List[float]] = [[] for _ in range(len(prediction_rindices))]
+    dimension_corr: List[List[float]] = [[] for _ in range(len(prediction_rindices))]
     for i in range(len(prediction_rindices)):
         for j in range(i + 1, len(prediction_rindices)):
             if i != j:
@@ -231,16 +259,23 @@ def calculate_group_compare_correlation(prediction_rindices, npattern):  # type:
                 )
                 diff_corr[i].append(diff_c_indices)
                 diff_corr[j].append(diff_c_indices)
-                dimnesion_corr[i].append(patt_c_indices)
-                dimnesion_corr[j].append(patt_c_indices)
+                dimension_corr[i].append(patt_c_indices)
+                dimension_corr[j].append(patt_c_indices)
     diff_corr = [np.mean(diff_corr[_]) for _ in range(len(prediction_rindices))]
     dimnesion_corr = [
-        np.mean(dimnesion_corr[_]) for _ in range(len(prediction_rindices))
+        np.mean(dimension_corr[_]) for _ in range(len(prediction_rindices))
     ]
     return diff_corr, dimnesion_corr
 
 
-def check_multimodel_agreement(data, covar, output_dir, epoch, repetition, npattern):  # type: ignore
+def check_multimodel_agreement(
+    data: np.ndarray,
+    covar: np.ndarray,
+    output_dir: str,
+    epoch: int,
+    repetition: int,
+    npattern: int,
+) -> List:
     all_finish = True
     for i in range(repetition):
         path = output_dir + "/model" + str(i)
