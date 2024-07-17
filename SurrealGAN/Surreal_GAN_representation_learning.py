@@ -49,14 +49,14 @@ def representation_result(
             max_index = best_row["best_model"]
             best_model_dir = os.path.join(output_dir, "model" + str(max_index))
             model = SurrealGAN()
-            model.load(best_model_dir, best_row["epoch"])  # type: ignore
+            model.load(best_model_dir, best_row["epoch"])
             validation_data = parse_validation_data(  # type: ignore
                 data,
                 covariate,
                 model.opt.correction_variables,  # type: ignore
                 model.opt.normalization_variables,  # type: ignore
             )[1]
-            r_indices = model.predict_rindices(validation_data)  # type: ignore
+            r_indices = model.predict_rindices(validation_data)
         else:
             raise Exception(
                 "At least 10 trained models are required (repetition number need to be at least 10)"
@@ -152,7 +152,7 @@ def repetitive_representation_learning(
     """
     print("Start Surreal-GAN for semi-supervised representation learning")
 
-    Surreal_GAN_model = Surreal_GAN_train(
+    Surreal_GAN_model = Surreal_GAN_train(  # type: ignore
         npattern,
         final_saving_epoch,
         recons_loss_threshold,
@@ -172,13 +172,13 @@ def repetitive_representation_learning(
         eval_freq=eval_freq,
         saving_freq=saving_freq,
         early_stop_thresh=early_stop_thresh,
-    )  # type: ignore
+    )
 
     if not stop_repetition:
         stop_repetition = repetition
     for i in range(start_repetition, stop_repetition):
         print("****** Starting training of Repetition " + str(i) + " ******")
-        converge = Surreal_GAN_model.train(
+        converge = Surreal_GAN_model.train(  # type: ignore
             data,
             covariate,
             output_dir,
@@ -186,12 +186,12 @@ def repetitive_representation_learning(
             random_seed=i,
             data_fraction=fraction,
             verbose=verbose,
-        )  # type: ignore
+        )
         while not converge:
             print(
                 "****** Model not converged at max interation, Start retraining ******"
             )
-            converge = Surreal_GAN_model.train(
+            converge = Surreal_GAN_model.train(  # type: ignore
                 data=data,
                 covariate=covariate,
                 save_dir=output_dir,
@@ -199,7 +199,7 @@ def repetitive_representation_learning(
                 data_fraction=fraction,
                 verbose=verbose,
                 repetition=repetition,
-            )  # type: ignore
+            )
 
     (
         r_indices,
