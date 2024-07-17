@@ -1,3 +1,5 @@
+from typing import Any, Iterator
+
 import numpy as np
 import torch
 
@@ -12,7 +14,13 @@ __status__ = "Development"
 
 
 class PTIterator(object):
-    def __init__(self, PT_data, random_seed, fraction, batch_size):  # type: ignore
+    def __init__(
+        self,
+        PT_data: np.ndarray,
+        random_seed: float,
+        fraction: float,
+        batch_size: int,
+    ) -> None:
         super(PTIterator, self).__init__()
         np.random.seed(random_seed)
         indices = np.random.choice(
@@ -22,16 +30,17 @@ class PTIterator(object):
         self.num_samples = self.data.shape[0]
         self.batch_size = batch_size
         self.n_batches = int(self.num_samples / self.batch_size)
-        self.reset()
+        self.data_indices = np.random.permutation(self.num_samples)
+        self.batch_idx = 0
 
-    def __iter__(self):  # type: ignore
+    def __iter__(self) -> Iterator:
         return self
 
     def reset(self) -> None:
         self.data_indices = np.random.permutation(self.num_samples)
         self.batch_idx = 0
 
-    def __next__(self):  # type: ignore
+    def __next__(self) -> dict:
         if self.batch_idx == self.n_batches - 1:
             self.reset()
             raise StopIteration
@@ -43,12 +52,18 @@ class PTIterator(object):
 
         return {"y": torch.from_numpy(self.data[chosen_indices])}
 
-    def __len__(self):  # type: ignore
+    def __len__(self) -> Any:
         return self.num_samples
 
 
 class CNIterator(object):
-    def __init__(self, CN_data, random_seed, fraction, batch_size):  # type: ignore
+    def __init__(
+        self,
+        CN_data: np.ndarray,
+        random_seed: float,
+        fraction: float,
+        batch_size: int,
+    ) -> None:
         super(CNIterator, self).__init__()
         np.random.seed(random_seed)
         indices = np.random.choice(
@@ -58,7 +73,8 @@ class CNIterator(object):
         self.num_samples = self.data.shape[0]
         self.batch_size = batch_size
         self.n_batches = int(self.num_samples / self.batch_size)
-        self.reset()
+        self.data_indices = np.random.permutation(self.num_samples)
+        self.batch_idx = 0
 
     def __iter__(self):  # type: ignore
         return self
@@ -67,7 +83,7 @@ class CNIterator(object):
         self.data_indices = np.random.permutation(self.num_samples)
         self.batch_idx = 0
 
-    def next(self):  # type: ignore
+    def next(self) -> dict:
         if self.batch_idx == self.n_batches:
             self.reset()
             # raise StopIteration
@@ -79,29 +95,29 @@ class CNIterator(object):
 
         return {"x": torch.from_numpy(self.data[chosen_indices])}
 
-    def __len__(self):  # type: ignore
+    def __len__(self) -> Any:
         return self.num_samples
 
 
 class val_PT_construction(object):
-    def __init__(self, PT_data):  # type: ignore
+    def __init__(self, PT_data: np.ndarray) -> None:
         super(val_PT_construction, self).__init__()
         self.data = PT_data.astype("float32")
 
-    def load(self):  # type: ignore
+    def load(self) -> torch.Tensor:
         return torch.from_numpy(self.data)
 
-    def __len__(self):  # type: ignore
-        return self.num_samples
+    # def __len__(self) -> Any:
+    #     return self.num_samples
 
 
 class val_CN_construction(object):
-    def __init__(self, CN_data):  # type: ignore
+    def __init__(self, CN_data: np.ndarray) -> None:
         super(val_CN_construction, self).__init__()
         self.data = CN_data.astype("float32")
 
-    def load(self):  # type: ignore
+    def load(self) -> torch.Tensor:
         return torch.from_numpy(self.data)
 
-    def __len__(self):  # type: ignore
-        return self.num_samples
+    # def __len__(self) -> int:
+    #     return self.num_samples
