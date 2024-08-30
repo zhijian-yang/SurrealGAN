@@ -1,9 +1,5 @@
 from SurrealGAN import Surreal_GAN_representation_learning
 import pandas as pd
-import numpy as np
-from lifelines.utils import concordance_index
-import itertools
-from scipy.stats import pearsonr
 import os
 
 application_roi = pd.read_csv('ROI_volume_file.csv') # change to the path of CSV file with 72 ROI volumes
