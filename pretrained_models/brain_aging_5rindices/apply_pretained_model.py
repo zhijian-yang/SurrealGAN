@@ -13,6 +13,6 @@ rindex = Surreal_GAN_representation_learning.apply_saved_model(model, applicatio
 representation_result = pd.DataFrame(data=rindex,columns=['r1','r2','r3','r4','r5'])
 representation_result['participant_id'] = application_roi['participant_id']
 representation_result.rename(columns={"r1": "r1", "r2": "r3",'r3':'r4','r4':'r5','r5':'r2'},inplace=True)
-representation_result[['participant_id','r1','r2','r3','r4','r5']].to_csv('representation_result_all_istaging.csv',index=False) # change to the path/name of the output file
+representation_result[['participant_id','r1','r2','r3','r4','r5']].to_csv('representation_result.csv',index=False) # change to the path/name of the output file
 
 
